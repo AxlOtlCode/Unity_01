@@ -1,63 +1,44 @@
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
-{
-    [SerializeField] private float speed = 5f; // Velocidad de movimiento
-    [SerializeField] private float jumpForce = 5f; // Fuerza del salto
-    [SerializeField] private float groundDistance = 0.2f; // Distancia al suelo
-    [SerializeField] private LayerMask groundMask; // Capa del suelo
+public class PlayerMovement : MonoBehaviour {
 
-    private Rigidbody rb;
-    private bool isGrounded;
+    //Movimiento del jugador
+    public float speed = 10.0f;
 
-    public float moveSpeed = 10.0f;
-    public float sensitivity = 0.1f;
+    //Rotación del jugador
+    public float cameraspeed = 10.0f;
+    public float sensitivity = 1.0f;
 
-    private float yaw = 0.0f;
-    private float pitch = 0.0f;
+    float horizontalRotation = 0.0f;
 
-    private void Start()
-    {
-        rb = GetComponent<Rigidbody>();
-        Cursor.lockState = CursorLockMode.Locked;
+
+    void Update() {
+
+        //Movimiento del jugador
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+
+        transform.Translate(new Vector3(horizontalInput, 0, verticalInput) * Time.deltaTime * speed);
+
+        //Rotación del jugador
+        float mouseX = Input.GetAxis("Mouse X");
+
+        horizontalRotation += mouseX * sensitivity;
+
+        transform.rotation = Quaternion.Euler(0f, horizontalRotation, 0f);
     }
 
-    private void Update()
-    {
-        // Mover el personaje
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveZ = Input.GetAxisRaw("Vertical");
-        Vector3 moveDir = new Vector3(moveX, 0f, moveZ).normalized;
-        rb.MovePosition(transform.position + moveDir * speed * Time.deltaTime);
+    /*void FixedUpdate() {
 
-        // Saltar
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            isGrounded = false;
-        }
+        //rotación del jugador
+        float moveHorizontal = Input.GetAxis("Horizontal");
+        float moveVertical = Input.GetAxis("Vertical");
 
-        float horizontal = Input.GetAxis("Mouse X");
-        float vertical = Input.GetAxis("Mouse Y");
+        Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
 
-        yaw += horizontal * sensitivity;
-        pitch -= vertical * sensitivity;
-        pitch = Mathf.Clamp(pitch, -80f, 80f);
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.AddForce(movement * cameraspeed);
+    }*/
 
-        transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
 
-        float forward = Input.GetAxis("Vertical");
-        float sideways = Input.GetAxis("Horizontal");
-
-        Vector3 direction = (transform.forward * forward) + (transform.right * sideways);
-        direction.y = 0f;
-
-        transform.position += direction.normalized * moveSpeed * Time.deltaTime;
-    }
-
-    private void FixedUpdate()
-    {
-        // Comprobar si el personaje está en el suelo
-        isGrounded = Physics.CheckSphere(transform.position, groundDistance, groundMask);
-    }
 }
